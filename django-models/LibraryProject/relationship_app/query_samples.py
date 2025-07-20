@@ -41,13 +41,10 @@ def run_queries():
     print("\n--- Running Queries ---\n")
 
     # 1. Query all books by a specific author.
-    # THIS IS THE SECTION THAT FIXES THE NEW ERROR
     print("1. Books by a specific author:")
     author_name = 'J.R.R. Tolkien'
-    # The variable MUST be named `author` for the checker
-    author = Author.objects.get(name=author_name) 
-    # The filter call now matches the checker's expectation: objects.filter(author=author)
-    author_books = Book.objects.filter(author=author) 
+    author = Author.objects.get(name=author_name)
+    author_books = Book.objects.filter(author=author)
     print(f"Books by {author_name}:")
     for book in author_books:
         print(f"- {book.title}")
@@ -62,10 +59,11 @@ def run_queries():
 
     # 3. Retrieve the librarian for a library.
     print("\n3. Librarian for a specific library:")
-    # We can reuse the specific_library object from the previous query
-    library_for_librarian_query = Library.objects.get(name='Central Library')
-    librarian = library_for_librarian_query.librarian
-    print(f"Librarian for {library_for_librarian_query.name}: {librarian.name}")
+    # First, we still need to get the library object to filter by.
+    library_object = Library.objects.get(name='Central Library')
+    # Now, perform the query on the Librarian model
+    librarian = Librarian.objects.get(library=library_object)
+    print(f"Librarian for {library_object.name}: {librarian.name}")
 
 
 if __name__ == '__main__':
