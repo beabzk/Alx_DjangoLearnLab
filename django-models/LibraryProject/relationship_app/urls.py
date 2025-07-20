@@ -9,11 +9,9 @@ urlpatterns = [
 
     path('auth/register/', views.register, name='register'),
     
-    path('auth/login/', LoginView.as_view(
-        template_name='relationship_app/login.html'
+    path('auth/login/', LoginView.as_view(template_name='relationship_app/login.html'
     ), name='login'),
     
-    path('auth/logout/', LogoutView.as_view(
-        template_name='relationship_app/logout.html'
+    path('auth/logout/', LogoutView.as_view(template_name='relationship_app/logout.html'
     ), name='logout'),
 ]
