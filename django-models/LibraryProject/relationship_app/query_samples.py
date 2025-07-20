@@ -40,23 +40,34 @@ def run_queries():
 
     print("\n--- Running Queries ---\n")
 
-    # 1. Query all books by a specific author (J.R.R. Tolkien)
-    print("1. Books by J.R.R. Tolkien:")
-    tolkien = Author.objects.get(name='J.R.R. Tolkien')
-    tolkien_books = Book.objects.filter(author=tolkien)
-    for book in tolkien_books:
+    # 1. Query all books by a specific author.
+    print("1. Books by a specific author:")
+    author_name = 'J.R.R. Tolkien'
+    specific_author = Author.objects.get(name=author_name)
+    author_books = Book.objects.filter(author=specific_author)
+    print(f"Books by {author_name}:")
+    for book in author_books:
         print(f"- {book.title}")
 
-    # 2. List all books in a library (Central Library)
-    print("\n2. Books in Central Library:")
-    central_library = Library.objects.get(name='Central Library')
-    for book in central_library.books.all():
+    # 2. List all books in a library.
+    # THIS IS THE SECTION THAT FIXES THE ERROR
+    print("\n2. Books in a specific library:")
+    library_name = 'Central Library'
+    specific_library = Library.objects.get(name=library_name) # Using the variable as required
+    print(f"Books in {library_name}:")
+    for book in specific_library.books.all():
         print(f"- {book.title}")
 
-    # 3. Retrieve the librarian for a library (Central Library)
-    print("\n3. Librarian for Central Library:")
-    librarian = central_library.librarian # Accessing the one-to-one relationship
-    print(f"- {librarian.name}")
+    # 3. Retrieve the librarian for a library.
+    print("\n3. Librarian for a specific library:")
+    # We can reuse the specific_library object from the previous query
+    library_for_librarian_query = Library.objects.get(name='Central Library')
+    librarian = library_for_librarian_query.librarian
+    print(f"Librarian for {library_for_librarian_query.name}: {librarian.name}")
+
 
 if __name__ == '__main__':
+    # This allows running the script directly like `python relationship_app/query_samples.py`
+    # after the initial setup.
+    print("Running sample queries...")
     run_queries()
