@@ -137,29 +137,38 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # =============================================================================
 # SECURITY SETTINGS - Best Practices Implementation
 # =============================================================================
+#
+# IMPORTANT: These settings are configured for PRODUCTION SECURITY
+# For development, you may need to temporarily disable some HTTPS-only settings
+# if you don't have SSL certificates set up locally.
+#
+# Production: All settings below should be enabled
+# Development: You may set SECURE_SSL_REDIRECT, SESSION_COOKIE_SECURE,
+#              and CSRF_COOKIE_SECURE to False for local development
+# =============================================================================
 
 # CSRF Protection Settings
-# Ensure CSRF cookies are only sent over HTTPS
-CSRF_COOKIE_SECURE = False  # Set to True to enforce HTTPS-only CSRF cookies (False for development)
+# Ensure CSRF cookies are only sent over HTTPS - REQUIRED FOR PRODUCTION SECURITY
+CSRF_COOKIE_SECURE = True  # Set to True to enforce HTTPS-only CSRF cookies
 
 # Session Security Settings
-# Ensure session cookies are only sent over HTTPS
-SESSION_COOKIE_SECURE = False  # Set to True to enforce HTTPS-only session cookies (False for development)
+# Ensure session cookies are only sent over HTTPS - REQUIRED FOR PRODUCTION SECURITY
+SESSION_COOKIE_SECURE = True  # Set to True to enforce HTTPS-only session cookies
 
 # Additional session security
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookies
 SESSION_COOKIE_AGE = 3600  # Session timeout after 1 hour of inactivity
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire session when browser closes
 
-# Browser Security Headers
+# Browser Security Headers - REQUIRED FOR PRODUCTION SECURITY
 # Enable XSS filtering in browsers
-SECURE_BROWSER_XSS_FILTER = True  # Enable browser's XSS filtering
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser's XSS filtering and help prevent XSS attacks
 
 # Prevent MIME type sniffing
-SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent browsers from MIME-sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent browsers from MIME-sniffing away from declared content-type
 
 # Clickjacking protection
-X_FRAME_OPTIONS = 'DENY'  # Prevent site from being framed (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'  # Set to "DENY" to prevent site from being framed (clickjacking protection)
 
 # Content Security Policy (CSP) Settings
 # Note: For production, consider using django-csp package for more advanced CSP
@@ -170,13 +179,13 @@ CSP_IMG_SRC = "'self' data:"
 CSP_FONT_SRC = "'self'"
 
 # Additional Security Headers
-# Force HTTPS redirects (uncomment for production with HTTPS)
-# SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+# Force HTTPS redirects - REQUIRED FOR PRODUCTION SECURITY
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
 
-# HTTP Strict Transport Security (HSTS)
-# SECURE_HSTS_SECONDS = 31536000  # 1 year
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+# HTTP Strict Transport Security (HSTS) - REQUIRED FOR PRODUCTION SECURITY
+SECURE_HSTS_SECONDS = 31536000  # 1 year (31536000 seconds)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include all subdomains in HSTS policy
+SECURE_HSTS_PRELOAD = True  # Allow HSTS preloading
 
 # Secure proxy headers (for deployment behind reverse proxy)
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
