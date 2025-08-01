@@ -1,18 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book List</title>
+    <title>Secure Book List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        .search-form {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .search-input {
+            padding: 8px;
+            width: 300px;
+            margin-right: 10px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .book-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            padding: 8px 12px;
+            margin: 0 4px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+        }
+
+        .pagination .current {
+            padding: 8px 12px;
+            margin: 0 4px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Book List</h1>
-    <ul>
+    <h1>Secure Book List</h1>
+    <p>This page demonstrates secure search functionality with protection against SQL injection and XSS attacks.</p>
+
+    <!-- Display messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Secure search form with CSRF protection -->
+    <div class="search-form">
+        <h3>Search Books</h3>
+        <form method="get">
+            <input type="text" name="search" class="search-input" placeholder="Search by title or author..."
+                value="{{ search_query|default:'' }}" maxlength="100">
+            <button type="submit" class="btn">Search</button>
+            {% if search_query %}
+            <a href="{% url 'book_list' %}" class="btn" style="background-color: #6c757d;">Clear</a>
+            {% endif %}
+        </form>
+        {% if search_query %}
+        <p><strong>Search results for:</strong> "{{ search_query|escape }}"</p>
+        {% endif %}
+    </div>
+
+    <!-- Book list with secure output -->
+    <div class="book-list">
+        {% if books %}
+        <h3>Books ({{ page_obj.paginator.count }} total)</h3>
         {% for book in books %}
-            <li>{{ book.title }} by {{ book.author }} ({{ book.publication_year }})</li>
-        {% empty %}
-            <li>No books available.</li>
+        <div class="book-item">
+            <strong>{{ book.title|escape }}</strong> by {{ book.author|escape }}
+            <span style="color: #666;">({{ book.publication_year }})</span>
+        </div>
         {% endfor %}
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">&laquo; first</a>
+            <a
+                href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a
+                href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">next</a>
+            <a
+                href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}">last
+                &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        {% if search_query %}
+        <div class="alert alert-info">
+            <p>No books found matching your search criteria.</p>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <p>No books available in the library.</p>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <hr>
+    <h3>Security Features Implemented:</h3>
+    <ul>
+        <li><strong>SQL Injection Prevention:</strong> Django ORM with parameterized queries</li>
+        <li><strong>XSS Prevention:</strong> All output properly escaped with |escape filter</li>
+        <li><strong>Input Validation:</strong> Search query length limited to 100 characters</li>
+        <li><strong>URL Encoding:</strong> Search parameters properly encoded in pagination links</li>
+        <li><strong>Performance:</strong> Pagination prevents large result sets</li>
     </ul>
+
+    <p><a href="{% url 'form_example' %}">Try the Secure Form Example</a></p>
 </body>
+
 </html>

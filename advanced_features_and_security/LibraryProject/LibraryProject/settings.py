@@ -23,9 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-v5@5i^kk!sc8i56ji8d4hyft8y$t_)n099#=&+295*grqv)l76'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Set DEBUG to False in production for security
+DEBUG = True  # Set to False for production security (temporarily True for development)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.herokuapp.com']  # Add your production domains
 
 
 # Application definition
@@ -132,3 +133,89 @@ LOGOUT_REDIRECT_URL = '/app/auth/login/' # Redirect to login page after logout
 # Media files configuration for profile photos
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# =============================================================================
+# SECURITY SETTINGS - Best Practices Implementation
+# =============================================================================
+
+# CSRF Protection Settings
+# Ensure CSRF cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = False  # Set to True to enforce HTTPS-only CSRF cookies (False for development)
+
+# Session Security Settings
+# Ensure session cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = False  # Set to True to enforce HTTPS-only session cookies (False for development)
+
+# Additional session security
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookies
+SESSION_COOKIE_AGE = 3600  # Session timeout after 1 hour of inactivity
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire session when browser closes
+
+# Browser Security Headers
+# Enable XSS filtering in browsers
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser's XSS filtering
+
+# Prevent MIME type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent browsers from MIME-sniffing
+
+# Clickjacking protection
+X_FRAME_OPTIONS = 'DENY'  # Prevent site from being framed (clickjacking protection)
+
+# Content Security Policy (CSP) Settings
+# Note: For production, consider using django-csp package for more advanced CSP
+CSP_DEFAULT_SRC = "'self'"
+CSP_SCRIPT_SRC = "'self' 'unsafe-inline'"
+CSP_STYLE_SRC = "'self' 'unsafe-inline'"
+CSP_IMG_SRC = "'self' data:"
+CSP_FONT_SRC = "'self'"
+
+# Additional Security Headers
+# Force HTTPS redirects (uncomment for production with HTTPS)
+# SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+
+# HTTP Strict Transport Security (HSTS)
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+# Secure proxy headers (for deployment behind reverse proxy)
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Password validation enhancement
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,  # Minimum 8 characters
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Logging configuration for security monitoring
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'security.log',
+        },
+    },
+    'loggers': {
+        'django.security': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}
