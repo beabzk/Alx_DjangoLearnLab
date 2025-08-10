@@ -46,7 +46,7 @@ class BookCreateView(generics.CreateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Require authentication
+    permission_classes = [IsAuthenticated]  # Require authentication
 
     def perform_create(self, serializer):
         """
@@ -91,7 +91,7 @@ class BookUpdateView(generics.UpdateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Require authentication
+    permission_classes = [IsAuthenticated]  # Require authentication
 
     def perform_update(self, serializer):
         """
@@ -136,7 +136,7 @@ class BookDeleteView(generics.DestroyAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Require authentication
+    permission_classes = [IsAuthenticated]  # Require authentication
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -202,4 +202,4 @@ class AuthorCreateView(generics.CreateAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
