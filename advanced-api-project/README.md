@@ -123,12 +123,12 @@ This provides complete author information including their bibliography in a sing
   - Permission: Public access
   - Returns: Single book details
 
-- **PUT/PATCH /api/books/{id}/update/** - Update existing book
+- **PUT/PATCH /api/books/update/{id}/** - Update existing book
   - Permission: Authenticated users only
   - Body: Full (PUT) or partial (PATCH) book data
   - Returns: Updated book data with success message
 
-- **DELETE /api/books/{id}/delete/** - Delete book
+- **DELETE /api/books/delete/{id}/** - Delete book
   - Permission: Authenticated users only
   - Returns: Deletion confirmation message
 
