@@ -23,6 +23,13 @@ The project implements a library management API with the following core models:
 - Enhanced response handling with custom messages
 - Comprehensive API documentation and testing
 
+### Task 2: Filtering, Searching, and Ordering ✅
+- Advanced filtering capabilities with custom filter classes
+- Full-text search across multiple fields
+- Flexible ordering by any field
+- Range filters and case-insensitive searches
+- Integration with DRF filter backends
+
 ## Project Structure
 
 ```
@@ -34,6 +41,8 @@ advanced-api-project/
 ├── api/                          # Main API application
 │   ├── models.py                 # Author and Book models
 │   ├── serializers.py            # Custom serializers with validation
+│   ├── views.py                  # API views with filtering/searching/ordering
+│   ├── filters.py                # Custom filter classes for advanced querying
 │   ├── admin.py                  # Django admin configuration
 │   ├── migrations/               # Database migrations
 │   └── ...
@@ -146,6 +155,46 @@ This provides complete author information including their bibliography in a sing
   - Permission: Public access
   - Returns: Author details with all their books
 
+## Advanced Query Features
+
+### Filtering
+Both Book and Author endpoints support advanced filtering:
+
+#### Book Filtering
+- **Basic filters**: `?title=1984`, `?author=1`, `?publication_year=1949`
+- **Case-insensitive title search**: `?title_icontains=animal`
+- **Author name filtering**: `?author_name=orwell`
+- **Year range filters**:
+  - `?publication_year_gte=1940` (books from 1940 onwards)
+  - `?publication_year_lte=1950` (books up to 1950)
+  - `?publication_year_range=1940,1950` (books between 1940-1950)
+
+#### Author Filtering
+- **Name filtering**: `?name=George Orwell`
+- **Case-insensitive name search**: `?name_icontains=george`
+- **Authors with/without books**: `?has_books=true` or `?has_books=false`
+
+### Searching
+Full-text search across multiple fields:
+- **Books**: `?search=orwell` (searches in title and author name)
+- **Authors**: `?search=george` (searches in author name)
+
+### Ordering
+Sort results by any field:
+- **Books**:
+  - `?ordering=title` (A-Z)
+  - `?ordering=-publication_year` (newest first)
+  - `?ordering=author__name` (by author name)
+- **Authors**:
+  - `?ordering=name` (A-Z)
+  - `?ordering=-name` (Z-A)
+
+### Combined Queries
+Combine multiple query parameters:
+```
+/api/books/?search=1984&publication_year_gte=1940&ordering=-publication_year
+```
+
 ## Setup Instructions
 
 ### 1. Install Dependencies
@@ -226,8 +275,8 @@ REST_FRAMEWORK = {
 ## Next Steps
 
 The following tasks will be implemented in subsequent phases:
-- [ ] Task 1: Custom Views and Generic Views
-- [ ] Task 2: Filtering, Searching, and Ordering
+- [x] Task 1: Custom Views and Generic Views
+- [x] Task 2: Filtering, Searching, and Ordering
 - [ ] Task 3: Unit Tests for API endpoints
 
 ## Database Configuration

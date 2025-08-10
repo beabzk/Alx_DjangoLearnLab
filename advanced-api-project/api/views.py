@@ -1,23 +1,53 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from .filters import BookFilter, AuthorFilter
 
 class BookListView(generics.ListAPIView):
     """
-    Generic ListView for retrieving all books.
+    Generic ListView for retrieving all books with advanced query capabilities.
 
     This view handles GET requests to retrieve a list of all books in the database.
-    It uses the BookSerializer to format the response data and supports pagination
-    if configured in the project settings.
+    It supports filtering, searching, and ordering to provide flexible data access.
+
+    Features:
+    - Filtering: Filter by title, author, and publication_year
+    - Searching: Search in title and author name fields
+    - Ordering: Order by any field, especially title and publication_year
 
     Permissions: Read-only access for all users (authenticated and unauthenticated)
+
+    Query Examples:
+    - Filter by author: /api/books/?author=1
+    - Filter by publication year: /api/books/?publication_year=1949
+    - Search in title/author: /api/books/?search=orwell
+    - Order by title: /api/books/?ordering=title
+    - Order by year (descending): /api/books/?ordering=-publication_year
+    - Combined: /api/books/?search=1984&ordering=publication_year
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.AllowAny]  # Allow read access to everyone
+
+    # Enable filtering, searching, and ordering
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    # Use custom filter class for advanced filtering capabilities
+    filterset_class = BookFilter
+
+    # Configure search fields (searches across these fields)
+    search_fields = ['title', 'author__name']
+
+    # Configure ordering fields (users can order by these fields)
+    ordering_fields = ['title', 'publication_year', 'author__name']
+
+    # Default ordering
+    ordering = ['title']
 
 
 class BookDetailView(generics.RetrieveAPIView):
@@ -163,17 +193,41 @@ class BookDeleteView(generics.DestroyAPIView):
 # Additional Author views for complete API functionality
 class AuthorListView(generics.ListAPIView):
     """
-    Generic ListView for retrieving all authors with their books.
+    Generic ListView for retrieving all authors with their books and advanced query capabilities.
 
     This view returns all authors along with their nested book information
-    using the AuthorSerializer. Useful for getting complete author profiles
-    including their bibliography.
+    using the AuthorSerializer. Supports filtering, searching, and ordering.
+
+    Features:
+    - Filtering: Filter by author name
+    - Searching: Search in author name
+    - Ordering: Order by name or book count
 
     Permissions: Read-only access for all users
+
+    Query Examples:
+    - Search authors: /api/authors/?search=orwell
+    - Order by name: /api/authors/?ordering=name
+    - Filter by name: /api/authors/?name=George Orwell
     """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     permission_classes = [permissions.AllowAny]
+
+    # Enable filtering, searching, and ordering
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    # Use custom filter class for advanced filtering capabilities
+    filterset_class = AuthorFilter
+
+    # Configure search fields
+    search_fields = ['name']
+
+    # Configure ordering fields
+    ordering_fields = ['name']
+
+    # Default ordering
+    ordering = ['name']
 
 
 class AuthorDetailView(generics.RetrieveAPIView):
