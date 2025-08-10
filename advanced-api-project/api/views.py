@@ -1,13 +1,12 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+from django_filters import rest_framework as django_filters
 from django.shortcuts import render
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .filters import BookFilter, AuthorFilter
-from django_filters import rest_framework
 
 class BookListView(generics.ListAPIView):
     """
@@ -36,7 +35,7 @@ class BookListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]  # Allow read access to everyone
 
     # Enable filtering, searching, and ordering
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Use custom filter class for advanced filtering capabilities
     filterset_class = BookFilter
@@ -216,7 +215,7 @@ class AuthorListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     # Enable filtering, searching, and ordering
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
     # Use custom filter class for advanced filtering capabilities
     filterset_class = AuthorFilter
