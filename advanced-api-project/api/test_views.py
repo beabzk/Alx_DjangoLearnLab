@@ -1,3 +1,20 @@
+"""
+Comprehensive Unit Tests for Django REST Framework APIs
+
+This module contains comprehensive unit tests for the advanced API project,
+covering all CRUD operations, filtering, searching, ordering, permissions,
+and data validation for both Book and Author models.
+
+Test Categories:
+- BookAPITestCase: CRUD operations for Book endpoints
+- BookFilteringTestCase: Filtering, searching, and ordering functionality
+- AuthorAPITestCase: CRUD operations for Author endpoints
+- PermissionsTestCase: Authentication and authorization testing
+- ValidationTestCase: Data validation and edge cases
+
+To run tests: python manage.py test api
+"""
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -287,3 +304,212 @@ class BookFilteringTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         years = [book['publication_year'] for book in response.data['results']]
         self.assertEqual(years, sorted(years, reverse=True))
+
+
+class AuthorAPITestCase(APITestCase):
+    """
+    Test suite for Author API endpoints.
+    """
+
+    def setUp(self):
+        """Set up test data for Author tests."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+        self.author1 = Author.objects.create(name="George Orwell")
+        self.author2 = Author.objects.create(name="Jane Austen")
+
+        # Create books for nested serialization testing
+        self.book1 = Book.objects.create(
+            title="1984",
+            publication_year=1949,
+            author=self.author1
+        )
+        self.book2 = Book.objects.create(
+            title="Animal Farm",
+            publication_year=1945,
+            author=self.author1
+        )
+
+        self.client = APIClient()
+
+    def test_get_author_list(self):
+        """Test retrieving list of all authors with nested books."""
+        url = reverse('api:author-list')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 2)
+
+        # Check nested books are included
+        orwell_data = next(
+            author for author in response.data['results']
+            if author['name'] == 'George Orwell'
+        )
+        self.assertEqual(len(orwell_data['books']), 2)
+        self.assertEqual(orwell_data['book_count'], 2)
+
+    def test_get_author_detail(self):
+        """Test retrieving a specific author with nested books."""
+        url = reverse('api:author-detail', kwargs={'pk': self.author1.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'George Orwell')
+        self.assertEqual(len(response.data['books']), 2)
+        self.assertEqual(response.data['book_count'], 2)
+
+        book_titles = [book['title'] for book in response.data['books']]
+        self.assertIn('1984', book_titles)
+        self.assertIn('Animal Farm', book_titles)
+
+    def test_create_author_authenticated(self):
+        """Test creating a new author with authentication."""
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse('api:author-create')
+        data = {'name': 'Ernest Hemingway'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Ernest Hemingway')
+        self.assertEqual(response.data['book_count'], 0)
+
+        # Verify author was created in database
+        self.assertTrue(Author.objects.filter(name='Ernest Hemingway').exists())
+
+    def test_create_author_unauthenticated(self):
+        """Test creating an author without authentication should fail."""
+        url = reverse('api:author-create')
+        data = {'name': 'Unauthorized Author'}
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PermissionsTestCase(APITestCase):
+    """
+    Test suite for API permissions and security.
+    """
+
+    def setUp(self):
+        """Set up test data for permission tests."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+
+        self.author = Author.objects.create(name="Test Author")
+        self.book = Book.objects.create(
+            title="Test Book",
+            publication_year=2023,
+            author=self.author
+        )
+
+        self.client = APIClient()
+
+    def test_read_permissions_unauthenticated(self):
+        """Test that unauthenticated users can read data."""
+        # Test book list
+        url = reverse('api:book-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test book detail
+        url = reverse('api:book-detail', kwargs={'pk': self.book.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test author list
+        url = reverse('api:author-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test author detail
+        url = reverse('api:author-detail', kwargs={'pk': self.author.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_write_permissions_require_authentication(self):
+        """Test that write operations require authentication."""
+        # Test book creation
+        url = reverse('api:book-create')
+        data = {'title': 'New Book', 'publication_year': 2023, 'author': self.author.pk}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Test book update
+        url = reverse('api:book-update', kwargs={'pk': self.book.pk})
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Test book delete
+        url = reverse('api:book-delete', kwargs={'pk': self.book.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Test author creation
+        url = reverse('api:author-create')
+        data = {'name': 'New Author'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class ValidationTestCase(APITestCase):
+    """
+    Test suite for data validation and edge cases.
+    """
+
+    def setUp(self):
+        """Set up test data for validation tests."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.author = Author.objects.create(name="Test Author")
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_book_future_year_validation(self):
+        """Test that books cannot be created with future publication years."""
+        url = reverse('api:book-create')
+        data = {
+            'title': 'Future Book',
+            'publication_year': 2030,  # Future year
+            'author': self.author.pk
+        }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('publication_year', response.data)
+
+    def test_book_empty_title_validation(self):
+        """Test that books cannot be created with empty titles."""
+        url = reverse('api:book-create')
+        data = {
+            'title': '',  # Empty title
+            'publication_year': 2023,
+            'author': self.author.pk
+        }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('title', response.data)
+
+    def test_book_invalid_author_validation(self):
+        """Test that books cannot be created with invalid author IDs."""
+        url = reverse('api:book-create')
+        data = {
+            'title': 'Test Book',
+            'publication_year': 2023,
+            'author': 9999  # Non-existent author
+        }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('author', response.data)
