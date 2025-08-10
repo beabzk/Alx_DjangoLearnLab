@@ -16,6 +16,13 @@ The project implements a library management API with the following core models:
 - Advanced serializers with nested relationships and validation
 - Custom validation for publication year (prevents future dates)
 
+### Task 1: Custom Views and Generic Views ✅
+- Complete CRUD operations using DRF generic views
+- Proper URL routing with RESTful endpoints
+- Permission-based access control (authenticated vs unauthenticated)
+- Enhanced response handling with custom messages
+- Comprehensive API documentation and testing
+
 ## Project Structure
 
 ```
@@ -100,6 +107,45 @@ books = BookSerializer(many=True, read_only=True)
 
 This provides complete author information including their bibliography in a single API call.
 
+## API Endpoints
+
+### Book Endpoints
+- **GET /api/books/** - List all books (paginated)
+  - Permission: Public access
+  - Returns: Paginated list of books with basic information
+
+- **POST /api/books/create/** - Create a new book
+  - Permission: Authenticated users only
+  - Body: `{"title": "Book Title", "publication_year": 2023, "author": 1}`
+  - Returns: Created book data with success message
+
+- **GET /api/books/{id}/** - Retrieve specific book
+  - Permission: Public access
+  - Returns: Single book details
+
+- **PUT/PATCH /api/books/{id}/update/** - Update existing book
+  - Permission: Authenticated users only
+  - Body: Full (PUT) or partial (PATCH) book data
+  - Returns: Updated book data with success message
+
+- **DELETE /api/books/{id}/delete/** - Delete book
+  - Permission: Authenticated users only
+  - Returns: Deletion confirmation message
+
+### Author Endpoints
+- **GET /api/authors/** - List all authors with their books
+  - Permission: Public access
+  - Returns: Authors with nested book information and book count
+
+- **POST /api/authors/create/** - Create a new author
+  - Permission: Authenticated users only
+  - Body: `{"name": "Author Name"}`
+  - Returns: Created author data
+
+- **GET /api/authors/{id}/** - Retrieve specific author with books
+  - Permission: Public access
+  - Returns: Author details with all their books
+
 ## Setup Instructions
 
 ### 1. Install Dependencies
@@ -138,6 +184,44 @@ The project includes a comprehensive test script (`test_setup.py`) that verifies
 - Data integrity
 
 Run the test with: `python test_setup.py`
+
+### API Views Testing
+The project includes comprehensive view testing (`test_views.py`) that verifies:
+- URL pattern resolution and routing
+- View instantiation and functionality
+- Permission class configuration
+- Serializer integration
+- HTTP response handling
+
+Run the view tests with: `python test_views.py`
+
+## Django REST Framework Configuration
+
+The project is configured with the following DRF settings:
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+}
+```
+
+### Key Features:
+- **Authentication**: Session and Basic authentication support
+- **Permissions**: Read access for all, write access for authenticated users
+- **Pagination**: 20 items per page with next/previous links
+- **Browsable API**: Interactive web interface for testing endpoints
 
 ## Next Steps
 
