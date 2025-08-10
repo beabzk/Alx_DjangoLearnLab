@@ -7,6 +7,7 @@ from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .filters import BookFilter, AuthorFilter
+from django_filters import rest_framework
 
 class BookListView(generics.ListAPIView):
     """
