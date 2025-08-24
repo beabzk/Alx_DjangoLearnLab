@@ -20,6 +20,6 @@ urlpatterns = [
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.profile, name='profile'),
     # Tag and Search URLs
-    path('tagged/<slug:slug>/', views.tagged, name='tagged'),
+    path('tags/<slug:tag_slug>/', views.PostByTagListView.as_view(), name='tagged'),
     path('search/', views.search, name='search'),
 ]

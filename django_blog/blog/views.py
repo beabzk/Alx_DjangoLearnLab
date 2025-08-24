@@ -203,15 +203,21 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.pk})
 
 
-def tagged(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
-    posts = Post.objects.filter(tags=tag).order_by('-published_date')
-    context = {
-        'tag': tag,
-        'posts': posts,
-        'title': f'Posts tagged with "{tag.name}"'
-    }
-    return render(request, 'blog/post_list.html', context)
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
+    paginate_by = 5
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
+        return Post.objects.filter(tags=self.tag).order_by('-published_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Posts tagged with "{self.tag.name}"'
+        context['tag'] = self.tag
+        return context
 
 
 def search(request):
