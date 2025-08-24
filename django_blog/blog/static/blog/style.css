@@ -1,0 +1,64 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+.blog-post {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+}
+
+.blog-post:last-child {
+    border-bottom: none;
+}
+
+.post-title {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.post-meta {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.btn-custom {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-section {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+}
+
+.comment {
+    border-left: 3px solid #007bff;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
+    text-decoration: none;
+}
+
+.tag:hover {
+    background-color: #dee2e6;
+    color: #495057;
+    text-decoration: none;
+}
+
+.search-form {
+    margin-bottom: 2rem;
+}
