@@ -1,0 +1,104 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Add Comment - {{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Add Comment</h3>
+                <p class="text-muted mb-0">
+                    Commenting on: <strong>{{ post.title }}</strong>
+                </p>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                            Comment <span class="text-danger">*</span>
+                        </label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.content.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Share your thoughts about this post. Minimum 5 characters required.
+                        </small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-chat-dots"></i> Post Comment
+                        </button>
+                        <a href="{% url 'blog:post-detail' post.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Original Post Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Original Post</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ post.title }}</h6>
+                <p class="text-muted mb-2">
+                    By {{ post.author.username }} on {{ post.published_date|date:"F d, Y" }}
+                </p>
+                <p class="card-text">
+                    {{ post.content|truncatewords:20 }}
+                </p>
+                <a href="{% url 'blog:post-detail' post.pk %}" class="btn btn-outline-primary btn-sm">
+                    View Full Post
+                </a>
+            </div>
+        </div>
+
+        <!-- Comment Guidelines -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Comment Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Be respectful</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Stay on topic</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Minimum 5 characters</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>No spam or abuse</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap form validation
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

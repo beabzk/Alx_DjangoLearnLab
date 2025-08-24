@@ -1,0 +1,124 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Edit Comment</h3>
+                <p class="text-muted mb-0">
+                    Editing comment on: <strong>{{ comment.post.title }}</strong>
+                </p>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                            Comment <span class="text-danger">*</span>
+                        </label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.content.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Update your comment. Minimum 5 characters required.
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Original comment posted:</strong> {{ comment.created_at|date:"F d, Y g:i A" }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Update Comment
+                        </button>
+                        <a href="{% url 'blog:post-detail' comment.post.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Original Post Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Original Post</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ comment.post.title }}</h6>
+                <p class="text-muted mb-2">
+                    By {{ comment.post.author.username }} on {{ comment.post.published_date|date:"F d, Y" }}
+                </p>
+                <p class="card-text">
+                    {{ comment.post.content|truncatewords:20 }}
+                </p>
+                <a href="{% url 'blog:post-detail' comment.post.pk %}" class="btn btn-outline-primary btn-sm">
+                    View Full Post
+                </a>
+            </div>
+        </div>
+
+        <!-- Comment Info -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Comment History</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Created:</strong> {{ comment.created_at|date:"F d, Y g:i A" }}</p>
+                {% if comment.updated_at != comment.created_at %}
+                <p><strong>Last Updated:</strong> {{ comment.updated_at|date:"F d, Y g:i A" }}</p>
+                {% else %}
+                <p class="text-muted">Never edited</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Edit Guidelines -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Edit Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Keep it respectful</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Stay on topic</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Minimum 5 characters</li>
+                    <li><i class="bi bi-info-circle text-info me-2"></i>Edit history is tracked</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Bootstrap form validation
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}
