@@ -7,7 +7,9 @@ from django.contrib import messages
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Post, Comment
-from .forms import CustomUserCreationForm, UserUpdateForm, CommentForm
+from .forms import CustomUserCreationForm, UserUpdateForm, CommentForm, PostForm
+from taggit.models import Tag
+from django.db.models import Q
 
 # Create your views here.
 
@@ -99,8 +101,8 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
+    form_class = PostForm
     template_name = 'blog/post_form.html'
-    fields = ['title', 'content']
     
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -113,8 +115,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
+    form_class = PostForm
     template_name = 'blog/post_form.html'
-    fields = ['title', 'content']
     
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -199,3 +201,33 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     
     def get_success_url(self):
         return reverse_lazy('blog:post-detail', kwargs={'pk': self.object.post.pk})
+
+
+def tagged(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    posts = Post.objects.filter(tags=tag).order_by('-published_date')
+    context = {
+        'tag': tag,
+        'posts': posts,
+        'title': f'Posts tagged with "{tag.name}"'
+    }
+    return render(request, 'blog/post_list.html', context)
+
+
+def search(request):
+    query = request.GET.get('q')
+    if query:
+        posts = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct().order_by('-published_date')
+    else:
+        posts = Post.objects.none()
+
+    context = {
+        'posts': posts,
+        'query': query,
+        'title': f'Search results for "{query}"'
+    }
+    return render(request, 'blog/search_results.html', context)

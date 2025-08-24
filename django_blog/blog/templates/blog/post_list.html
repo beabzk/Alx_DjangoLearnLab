@@ -26,7 +26,16 @@
                 {% endif %}
             </p>
             <p>{{ post.content|truncatewords:50 }}</p>
-            <a href="{% url 'blog:post-detail' post.pk %}" class="btn btn-outline-primary btn-sm">Read More</a>
+            <div class="post-tags">
+                <strong>Tags:</strong>
+                {% for tag in post.tags.all %}
+                <a href="{% url 'blog:tagged' tag.slug %}" class="badge bg-primary text-decoration-none">{{ tag.name
+                    }}</a>
+                {% empty %}
+                <span class="text-muted">No tags.</span>
+                {% endfor %}
+            </div>
+            <a href="{% url 'blog:post-detail' post.pk %}" class="btn btn-outline-primary btn-sm mt-2">Read More</a>
         </article>
         {% endfor %}
 

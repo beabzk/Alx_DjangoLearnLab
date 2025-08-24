@@ -29,6 +29,16 @@
                 </div>
             </div>
 
+            <div class="post-tags mt-4">
+                <strong>Tags:</strong>
+                {% for tag in post.tags.all %}
+                <a href="{% url 'blog:tagged' tag.slug %}" class="badge bg-primary text-decoration-none">{{ tag.name
+                    }}</a>
+                {% empty %}
+                <span class="text-muted">No tags yet.</span>
+                {% endfor %}
+            </div>
+
             <hr>
 
             <!-- Comments Section -->
