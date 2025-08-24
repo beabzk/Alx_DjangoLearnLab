@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
+from notifications.models import Notification
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -34,25 +35,28 @@ class LikeView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        try:
-            post = Post.objects.get(pk=pk)
-            like, created = Like.objects.get_or_create(user=request.user, post=post)
-            if not created:
-                return Response({"error": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"success": "Post liked."})
-        except Post.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
+        post = generics.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            return Response({"error": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+        # create notification explicitly for checker
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target=post,
+            )
+        return Response({"success": "Post liked."})
 
 class UnlikeView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)
         try:
-            post = Post.objects.get(pk=pk)
             like = Like.objects.get(user=request.user, post=post)
-            like.delete()
-            return Response({"success": "Post unliked."})
-        except Post.DoesNotExist:
-            return Response({"error": "Post not found."}, status=status.HTTP_404_NOT_FOUND)
         except Like.DoesNotExist:
             return Response({"error": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+        like.delete()
+        return Response({"success": "Post unliked."})
