@@ -1,8 +1,8 @@
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Like, Notification
-from posts.models import Comment
+from .models import Notification
+from posts.models import Comment, Like
 from accounts.models import CustomUser
 
 @receiver(post_save, sender=Like)
