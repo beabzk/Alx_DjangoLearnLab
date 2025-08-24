@@ -46,7 +46,7 @@ for field_name, field in CustomUserCreationForm.base_fields.items():
 class PostForm(forms.ModelForm):
     tags = TagField(
         required=False,
-        widget=TagWidget(attrs={'class': 'form-control', 'placeholder': 'Enter tags separated by commas'})
+        widget=TagWidget()
     )
 
     class Meta:
