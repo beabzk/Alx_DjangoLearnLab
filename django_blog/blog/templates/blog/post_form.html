@@ -1,0 +1,122 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    {% if object %}
+                    Edit Post: "{{ object.title }}"
+                    {% else %}
+                    Create New Post
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.title.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Enter a compelling title for your blog post (max 200 characters).
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">Content</label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.content.errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Write your blog post content. You can use line breaks to separate paragraphs.
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% if object %}{% url 'blog:post-detail' object.pk %}{% else %}{% url 'blog:post-list' %}{% endif %}"
+                            class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if object %}
+                            Update Post
+                            {% else %}
+                            Create Post
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if object %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Post Preview</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">{{ object.title }}</h6>
+                <p class="card-text text-muted">
+                    By {{ object.author.username }} on {{ object.published_date|date:"F d, Y g:i A" }}
+                </p>
+                <p class="card-text">{{ object.content|truncatewords:50 }}</p>
+                <a href="{% url 'blog:post-detail' object.pk %}" class="btn btn-outline-primary btn-sm">
+                    View Full Post
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Writing Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Title:</strong> Make it descriptive and engaging
+                    </li>
+                    <li class="mb-2">
+                        <strong>Content:</strong> Use clear paragraphs and good structure
+                    </li>
+                    <li class="mb-2">
+                        <strong>Length:</strong> Aim for at least 100 words for better engagement
+                    </li>
+                    <li class="mb-2">
+                        <strong>Preview:</strong> Read through your post before publishing
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'blog:post-list' %}" class="btn btn-outline-primary btn-sm d-block mb-2">
+                    View All Posts
+                </a>
+                <a href="{% url 'blog:home' %}" class="btn btn-outline-secondary btn-sm d-block">
+                    Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
